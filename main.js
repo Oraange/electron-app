@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 
 const createWindow = () => {
@@ -8,14 +8,15 @@ const createWindow = () => {
         height: 600,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
-        }
+        },
     })
 
     // Load the index.html of the app.
+    ipcMain.handle('ping', () => 'pong')
     win.loadFile('index.html')
 
     // Open the Dev Tools.
-    // win.webContents.openDevTools()
+    win.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -39,4 +40,5 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
 })
 
-// In this file you can 
+// In this file you can include the rest of your app's specific main process code.
+// You can also put them in separate files and require them here.
