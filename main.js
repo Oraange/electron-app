@@ -9,6 +9,7 @@ const createWindow = () => {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         },
+        icon: path.join(__dirname, 'assets/icons/win/readeo_icon.ico')
     })
 
     // Load the index.html of the app.
@@ -16,7 +17,7 @@ const createWindow = () => {
     win.loadFile('index.html')
 
     // Open the Dev Tools.
-    win.webContents.openDevTools()
+    // win.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -29,7 +30,6 @@ app.whenReady().then(() => {
         // On macOS it's common to re-create a window in the app when the
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
-        console.log(process.versions)
     })
 })
 

@@ -9,8 +9,13 @@
   </head>
   <body>
     <h1>Hello from Electron renderer!</h1>
-    <p>👏🏻</p>
+    <p>👏🏻 반갑습니다. 이름을 발급받으시려면 아래 버튼을 눌러주세요!</p>
+
+    <button id="get">Name Generator</button>
+    <p id="user_name"></p>
     <p id="info"></p>
   </body>
-  <script src="./renderer.js"></script>
+  <script type="module" src="./renderer.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js" integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- <script src="./index.js"></script> -->
 </html>
