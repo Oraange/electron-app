@@ -19,10 +19,10 @@
 
 const { contextBridge, ipcRenderer } = require('electron')
 
-contextBridge.exposeInMainWorld('versions', {
-    node: () => process.versions.node,
-    chrome: () => process.versions.chrome,
-    electron: () => process.versions.electron,
+contextBridge.exposeInMainWorld('electron', {
+    startDrag: (fileName) => {
+        ipcRenderer.send('ondragstart', path.join(process.cwd(), fileName))
+    },
     ping: () => ipcRenderer.invoke('ping'),
     // we can also expose varialbes, not just functions
 })
