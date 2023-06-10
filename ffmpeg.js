@@ -5,6 +5,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 
 function fadeInOut(inputFile, outputFile) {
     return new Promise((resolve, reject) => {
+        document.getElementById('fadeEffect').innerHTML = "🌘Fade In / Out 효과를 넣고있어요"
         ffmpeg(inputFile)
         .videoFilter('fade=t=in:st=0:d=10,fade=t=out:st=50:d=5')
         .audioCodec('copy')
@@ -17,6 +18,7 @@ function fadeInOut(inputFile, outputFile) {
 
 function convertToWav(inputFile, outputFile) {
     return new Promise((resolve, reject) => {
+        document.getElementById('getWav').innerHTML = "🔉음성을 추출 중이에요"
         ffmpeg(inputFile)
         .audioCodec('pcm_s16le')
         .audioChannels(1)
