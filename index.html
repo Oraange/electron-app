@@ -6,34 +6,105 @@
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"/> -->
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"/>
     <title style="justify-content: center;">Hello from Electron renderer!</title>
+    <style>
+      .btnGroup button {
+        margin-left: 20px;
+        border: 1px solid skyblue;
+        background-color: rgba(0, 0, 0, 0);
+        color: skyblue;
+        padding: 5px;
+        width: 150px;
+        height: 74px;
+        cursor: pointer;
+      }
+      #getAudio {
+        border-top-left-radius: 7px;
+        border-bottom-left-radius: 7px;
+        margin-right: -1px;
+      }
+      #burnIn {
+        margin-left: 0px;
+      }
+      #inputFade {
+        border-top-right-radius: 7px;
+        border-bottom-right-radius: 7px;
+        margin-left: -1px;
+      }
+      .btnGroup button:hover {
+        background-color: skyblue;
+        color: white;
+      }
+      .btnGroup div {
+        display: flex;
+        margin-top: 15%;
+        margin-left: 10px;
+      }
+      #process {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #52cd86;
+        border: 1px solid #52cd86;
+        border-radius: 7px;
+        color: white;
+        padding: 20px 50px 20px 50px;
+        float: right;
+        display: none;
+      }
+    </style>
     <script src="./renderer.js" type="module"></script>
   </head>
   <body>
     <h1>Hello from Electron renderer!</h1>
     <p style="margin: auto;">👏🏻 반갑습니다. 영상을 시청해 보세요!</p>
     <p>현재 연결 상태: <strong id="status"></strong></p>
-    <input type="file" accept="video/*">
-    <br><br>
-    <video id="videoPlayer" controls width="500px" height="300px"></video>
-    <br><br>
-    <form id="getAudio">
-      <button type="submit">음성 추출</button>
-      <div id="getWav"></div>
-      <br><br>
-    </form>
-    <form id="burnIn">
-      <button type="submit">자막 번인</button>
-      <div id="pending"></div>
-      <br><br>
-    </form>
-    <form id="inputFade">
-      <button type="submit">Fade 효과 삽입</button>
-      <div id="fadeEffect"></div>
-      <br><br>
-    </form>
-    <h1 id="result"></h1>
+    <div id="process"></div>
+
+    <hr width="80%">
+    <br>
+
+    <div style="margin-left: 35%;">
+      <div>
+        <input type="file" accept="video/*">
+        <br>
+        <video id="videoPlayer" controls width="500px" height="300px"></video>
+        <br><br>
+      </div>
+
+      <div style="margin-right: auto;">
+        <div class="btnGroup" style="display: flex;">
+          <button id="getAudio" type="button">음성 추출</button>
+          <button id="burnIn" type="button">자막 번인</button>
+          <button id="inputFade" type="button">Fade 효과 삽입</button>
+        </div>
+        <br><br>
+
+      </div>
+    </div>
+
+    <hr width="80%">
+    <br>
+
     <div style="border:2px solid black;border-radius:3px;padding:5px;display:inline-block;width:300px;height:300px;display: flex;justify-content: center;align-items: center;" draggable="false" id="drag">Drag to me</div>
     <div id="file1"></div><br>
     <div id="file2"></div>
+    <div style="flex: content;">
+      <button id="divide" type="button">영상 분리</button>
+      <br><br>
+      <div id="videoSep"></div>
+        <video id="videoPlayer1" controls width="500px" height="300px"></video>
+        <video id="videoPlayer2" controls width="500px" height="300px"></video>
+    </div>
+    <button id="concat" type="button">영상 합치기</button>
+    <br><br>
+    <div id="videoConcat"></div>
+    <div>
+      <video id="concatedVideo" controls width="500px" height="300px"></video>
+    </div>
+    <button id="imgToVideo" type="button">이미지로 영상 생성</button>
+    <br><br>
+    <div id="boxOfImgToVideo"></div>
+    <input id="imgFile" type="file" accept="image/*"/>
+    <video id="videoPlayer3" controls width="500px" height="300px"></video>
   </body>
 </html>
