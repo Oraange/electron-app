@@ -1,4 +1,6 @@
 const electron = require('electron')
+const dirPath = require('path')
+const fs = require('fs')
 const {
     convertToWav,
     burnInSubtitle,
@@ -8,43 +10,46 @@ const {
     concatVideos
 } = require('./ffmpeg.js');
 
-const ffmpegPath = require('ffmpeg-static-electron').path;
+const dragZone = document.querySelectorAll('.drag')
 
-const dragZone = document.getElementById('drag')
+let dragedFile1; let dragedFile2;
 
-dragZone.addEventListener('drop', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+dragZone.forEach((element) => {
+    element.addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
-    const file1 = document.getElementById('file1')
-    const file2 = document.getElementById('file2')
+        const holdFile = event.dataTransfer.files
 
-    for (const f of event.dataTransfer.files) {
-        if (file1.innerHTML === "") {
-            file1.innerHTML = f.path
+        if (holdFile.length >= 2) {
+            element.innerHTML = "한 번에 하나의 파일만 올려주세요!";
         } else {
-            file2.innerHTML = f.path
+            if (element.id === 'drag1') dragedFile1 = holdFile[0]
+            else dragedFile2 = holdFile[0]
+            element.innerHTML = holdFile[0].path
         }
-    }
-    dragZone.style.backgroundColor = 'white'
-});
 
-dragZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-});
+        console.log("First section: ", dragedFile1, "\nSecond section: ", dragedFile2)
+        element.style.backgroundColor = 'white'
+    });
 
-dragZone.addEventListener('dragenter', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragZone.style.backgroundColor = '#E2E2E2'
-});
+    element.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
 
-dragZone.addEventListener('dragleave', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('File has left the Drop Space');
-    dragZone.style.backgroundColor = 'white'
+    element.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        element.style.backgroundColor = '#E2E2E2'
+    });
+
+    element.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('File has left the Drop Space');
+        element.style.backgroundColor = 'white'
+    });
 });
 
 const updateOnlineStatus = () => {
@@ -79,19 +84,6 @@ const playVideo = (file, videoPlayer) => {
     videoPlayer.play();
 };
 
-function fade(element) {
-    var op = 1;
-    var timer = setInterval(function () {
-        if (op <= 0.1) {
-            clearInterval(timer);
-            element.style.display = 'none';
-        }
-        element.style.opacity = op;
-        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
-        op -= 0.1;
-    }, 80);
-}
-
 const fixedDiv = document.getElementById('process');
 
 document.querySelector('#getAudio').addEventListener('click', (event) => {
@@ -99,9 +91,11 @@ document.querySelector('#getAudio').addEventListener('click', (event) => {
 
     if (file.files['length'] === 0) {
         fixedDiv.innerHTML = "아직 영상이 없어요";
-        fixedDiv.style.display = 'block'
-        fixedDiv.style.opacity = 1
-        fade(fixedDiv)
+        fixedDiv.style.zIndex = 2;
+        setTimeout(() => {
+            fixedDiv.innerHTML = "";
+            fixedDiv.style.zIndex = 1;
+        }, 3000);
         return;
     }
     console.time("음성 추출 작업 시간: ");
@@ -109,32 +103,34 @@ document.querySelector('#getAudio').addEventListener('click', (event) => {
 
     convertToWav(path, 'media/aplis_output.wav')
     .then(() => {
-        document.getElementById('process').innerHTML = "🔊음성 추출이 완료되었어요"
+        fixedDiv.innerHTML = "🔊음성 추출이 완료되었어요"
         console.log('Get wav file completed');
         console.timeEnd("음성 추출 작업 시간: ");
     })
     .catch((error) => {
-        document.getElementById('process').innerHTML = "❌작업에 실패했어요..."
+        fixedDiv.innerHTML = "❌작업에 실패했어요..."
         console.error('Get wav file error: ', error);
     });
 });
 
 document.querySelector('#burnIn').addEventListener('click', (event) => {
+    event.preventDefault();
     if (file.files['length'] === 0) {
         fixedDiv.innerHTML = "아직 영상이 없어요";
-        fixedDiv.style.display = 'block'
-        fixedDiv.style.opacity = 1
-        fade(fixedDiv)
+        fixedDiv.style.zIndex = 2;
+        setTimeout(() => {
+            fixedDiv.innerHTML = "";
+            fixedDiv.style.zIndex = 1;
+        }, 3000);
         return;
     }
     console.time("번인 작업 시간: ");
-    event.preventDefault();
     const { path } = file.files[0];
     const outputFile = 'media/aplis_output.mp4'
 
     burnInSubtitle(path, 'media/aplis.srt', outputFile)
     .then(() => {
-        document.getElementById('process').innerHTML = "👍영상에 자막이 생겼어요!"
+        fixedDiv.innerHTML = "👍영상에 자막이 생겼어요!"
         console.log('Burn In completed');
         const videoPlayer = document.getElementById('videoPlayer');
         videoPlayer.src = outputFile;
@@ -143,27 +139,29 @@ document.querySelector('#burnIn').addEventListener('click', (event) => {
         console.timeEnd("번인 작업 시간: ");
     })
     .catch((error) => {
-        document.getElementById('process').innerHTML = "❌작업에 실패했어요..."
+        fixedDiv.innerHTML = "❌작업에 실패했어요..."
         console.error('Burn In error: ', error);
     });
 });
 
 document.querySelector('#inputFade').addEventListener('click', (event) => {
+    event.preventDefault();
     if (file.files['length'] === 0) {
         fixedDiv.innerHTML = "아직 영상이 없어요";
-        fixedDiv.style.display = 'block'
-        fixedDiv.style.opacity = 1
-        fade(fixedDiv)
+        fixedDiv.style.zIndex = 2;
+        setTimeout(() => {
+            fixedDiv.innerHTML = "";
+            fixedDiv.style.zIndex = 1;
+        }, 3000);
         return;
     }
     console.time("영상 효과 작업 시간: ");
-    event.preventDefault();
     const { path } = file.files[0];
     const outputFile = 'media/aplis_fade.mp4'
 
     fadeInOut(path, outputFile)
     .then(() => {
-        document.getElementById('process').innerHTML = "🌕영상에 Fade 효과가 적용됐어요"
+        fixedDiv.innerHTML = "🌕영상에 Fade 효과가 적용됐어요"
         console.log('Inser FadeIn or FadeOut effect success.')
         const videoPlayer = document.getElementById('videoPlayer');
         videoPlayer.src = outputFile;
@@ -172,28 +170,30 @@ document.querySelector('#inputFade').addEventListener('click', (event) => {
         console.timeEnd("영상 효과 작업 시간: ");
     })
     .catch((error) => {
-        document.getElementById('process').innerHTML = "❌작업에 실패했어요..."
+        fixedDiv.innerHTML = "❌작업에 실패했어요..."
         console.error('Insert FadeIn or FadeOut effect is in error: ', error);
     });
 });
 
 document.querySelector('#divide').addEventListener('click', (event) => {
+    event.preventDefault();
     if (file.files['length'] === 0) {
         fixedDiv.innerHTML = "아직 영상이 없어요";
-        fixedDiv.style.display = 'block'
-        fixedDiv.style.opacity = 1
-        fade(fixedDiv)
+        fixedDiv.style.zIndex = 2;
+        setTimeout(() => {
+            fixedDiv.innerHTML = "";
+            fixedDiv.style.zIndex = 1;
+        }, 3000);
         return;
     }
     console.time("영상 분리 시간: ");
-    event.preventDefault();
     const { path } = file.files[0];
     const outputFile1 = 'media/aplis_sep_1.mp4';
     const outputFile2 = 'media/aplis_sep_2.mp4';
 
     separateVideo(path, '00:1:15', outputFile1, outputFile2)
     .then(() => {
-        document.getElementById('videoSep').innerHTML = "✔️영상 분리에 성공했습니다"
+        fixedDiv.innerHTML = "✔️영상 분리에 성공했습니다"
         console.timeEnd("영상 분리 시간: ");
         const videoPlayer1 = document.getElementById('videoPlayer1');
         const videoPlayer2 = document.getElementById('videoPlayer2');
@@ -207,21 +207,23 @@ document.querySelector('#divide').addEventListener('click', (event) => {
         });
     })
     .catch((error) => {
-        document.getElementById('videoSep').innerHTML = "영상 분리에 실패하였습니다";
+        fixedDiv.innerHTML = "영상 분리에 실패하였습니다";
         console.error('영상 분리에 실패하였습니다: ', error)
     })
 });
 
 document.querySelector('#imgToVideo').addEventListener('click', (event) => {
+    event.preventDefault();
     const file = document.getElementById('imgFile')
     if (file.files['length'] === 0) {
         fixedDiv.innerHTML = "아직 영상이 없어요";
-        fixedDiv.style.display = 'block'
-        fixedDiv.style.opacity = 1
-        fade(fixedDiv)
+        fixedDiv.style.zIndex = 2;
+        setTimeout(() => {
+            fixedDiv.innerHTML = "";
+            fixedDiv.style.zIndex = 1;
+        }, 3000);
         return;
     }
-    event.preventDefault();
     console.time("영상 생성 시간: ")
     const { path } = file.files[0];
     console.log(path)
@@ -229,7 +231,7 @@ document.querySelector('#imgToVideo').addEventListener('click', (event) => {
 
     imgToVideo(path, outputFile)
     .then(() => {
-        document.getElementById('boxOfImgToVideo').innerHTML = "👏🏻영상 생성 성공"
+        fixedDiv.innerHTML = "👏🏻영상 생성 성공"
         const videoPlayer3 = document.getElementById('videoPlayer3');
         videoPlayer3.src = outputFile;
         videoPlayer3.load();
@@ -237,9 +239,45 @@ document.querySelector('#imgToVideo').addEventListener('click', (event) => {
         console.timeEnd("영상 생성 시간: ")
     })
     .catch((error) => {
-        document.getElementById('boxOfImgToVideo').innerHTML = "❌영상 생성 실패"
+        fixedDiv.innerHTML = "❌영상 생성 실패"
         console.error('영상 생성에 실패했습니다: ', error)
     })
 })
 
-document.querySelector('#concat').addEventListener('click')
+document.querySelector('#concat').addEventListener('click', (event) => {
+    console.log(dragedFile1.name)
+    event.preventDefault();
+    if (dragedFile1 === undefined || dragedFile2 === undefined) {
+        fixedDiv.innerHTML = "아직 영상이 없어요";
+        fixedDiv.style.zIndex = 2;
+        setTimeout(() => {
+            fixedDiv.innerHTML = "";
+            fixedDiv.style.zIndex = 1;
+        }, 3000);
+        return;
+    }
+    console.time("영상 합치기 시간: ")
+
+    try {
+        fs.writeFileSync('media/concat.txt',
+        `file ${dragedFile1.name}\nfile ${dragedFile2.name}`, 'utf-8');
+    } catch(e) {
+        alert('Failed to save the file!');
+    }
+
+
+    const outputFile = 'media/concated.mp4'
+    concatVideos('media/concat.txt', outputFile)
+    .then(() => {
+        fixedDiv.innerHTML = "영상 합치기 성공"
+        const concatedVideo = document.getElementById('concatedVideo');
+        concatedVideo.src = outputFile;
+        concatedVideo.load();
+        concatedVideo.play();
+        console.timeEnd("영상 합치기 시간: ")
+    })
+    .catch((error) => {
+        fixedDiv.innerHTML = "영상 합치기 실패..."
+        console.error('영상 합치기에 실패했습니다: ', error)
+    });
+})

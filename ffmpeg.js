@@ -93,9 +93,12 @@ function imgToVideo(inputImageFile, outputFile) {
 // 영상 합치기
 function concatVideos(inputFile, outputFile) {
     return new Promise((resolve, reject) => {
-        document.getElementById('concat').innerHTML = "👫영상을 합치는 중";
+        document.getElementById('process').innerHTML = "👫영상을 합치는 중";
         ffmpeg()
-        .concat(inputFile)
+        .input(inputFile)
+        .inputOptions('-f concat')
+        .audioCodec('copy')
+        .videoCodec('copy')
         .output(outputFile)
         .on('end', resolve)
         .on('error', reject)

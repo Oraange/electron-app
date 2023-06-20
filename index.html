@@ -42,14 +42,19 @@
       #process {
         position: fixed;
         top: 20px;
-        right: 20px;
+        height: 20px;
+        width: 90%;
         background-color: #52cd86;
         border: 1px solid #52cd86;
         border-radius: 7px;
         color: white;
         padding: 20px 50px 20px 50px;
         float: right;
-        display: none;
+        z-index: 1;
+      }
+      h1 {
+        position: relative;
+        z-index: 2;
       }
     </style>
     <script src="./renderer.js" type="module"></script>
@@ -85,9 +90,6 @@
     <hr width="80%">
     <br>
 
-    <div style="border:2px solid black;border-radius:3px;padding:5px;display:inline-block;width:300px;height:300px;display: flex;justify-content: center;align-items: center;" draggable="false" id="drag">Drag to me</div>
-    <div id="file1"></div><br>
-    <div id="file2"></div>
     <div style="flex: content;">
       <button id="divide" type="button">영상 분리</button>
       <br><br>
@@ -95,12 +97,28 @@
         <video id="videoPlayer1" controls width="500px" height="300px"></video>
         <video id="videoPlayer2" controls width="500px" height="300px"></video>
     </div>
+
+    <br>
+    <hr width="80%">
+    <br>
+
+    <div style="display: flex;">
+      <div style="border:2px solid black;border-radius:3px;padding:5px;display:inline-block;width:300px;height:300px;display: flex;justify-content: center;align-items: center;" draggable="false" id="drag1" class="drag">Drag to me</div>
+      <div style="border:2px solid black;border-radius:3px;padding:5px;display:inline-block;width:300px;height:300px;display: flex;justify-content: center;align-items: center;" draggable="false" id="drag2" class="drag">Drag to me</div>
+    </div>
+    <div id="file1"></div><br>
+    <div id="file2"></div>
     <button id="concat" type="button">영상 합치기</button>
     <br><br>
     <div id="videoConcat"></div>
     <div>
       <video id="concatedVideo" controls width="500px" height="300px"></video>
     </div>
+
+    <br>
+    <hr width="80%">
+    <br>
+
     <button id="imgToVideo" type="button">이미지로 영상 생성</button>
     <br><br>
     <div id="boxOfImgToVideo"></div>
