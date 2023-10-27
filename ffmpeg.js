@@ -50,29 +50,29 @@ function burnInSubtitle(inputVideoFile, inputSubtitleFile, outputFile) {
 }
 
 // 영상 분리
-function separateVideo(inputVideoFile, sepTime, outputFile1, outputFile2) {
-    const duration = "00:31:25"
-    return new Promise((resolve, reject) => {
-        document.getElementById('process').innerHTML = "🔪영상을 나누고 있습니다"
-        ffmpeg()
-        .input(inputVideoFile)
-        .inputOptions(['-ss', '00:00:00', '-t', sepTime])
-        .output(outputFile1)
-        .outputOptions('-c:v', 'copy', '-c:a', 'copy')
-        .on('end', () => {
-            ffmpeg()
-            .input(inputVideoFile)
-            .inputOptions(['-ss', sepTime, '-t', duration])
-            .output(outputFile2)
-            .outputOptions('-c:v', 'copy', '-c:a', 'copy')
-            .on('end', resolve)
-            .on('error', reject)
-            .run()
-        })
-        .on('error', reject)
-        .run();
-    })
-}
+// function separateVideo(inputVideoFile, sepTime, outputFile1, outputFile2) {
+//     const duration = "00:31:25"
+//     return new Promise((resolve, reject) => {
+//         document.getElementById('process').innerHTML = "🔪영상을 나누고 있습니다"
+//         ffmpeg()
+//         .input(inputVideoFile)
+//         .inputOptions(['-ss', '00:00:00', '-t', sepTime])
+//         .output(outputFile1)
+//         .outputOptions('-c:v', 'copy', '-c:a', 'copy')
+//         .on('end', () => {
+//             ffmpeg()
+//             .input(inputVideoFile)
+//             .inputOptions(['-ss', sepTime, '-t', duration])
+//             .output(outputFile2)
+//             .outputOptions('-c:v', 'copy', '-c:a', 'copy')
+//             .on('end', resolve)
+//             .on('error', reject)
+//             .run()
+//         })
+//         .on('error', reject)
+//         .run();
+//     })
+// }
 
 // 이미지로 영상 생성
 function imgToVideo(inputImageFile, outputFile) {
@@ -106,11 +106,61 @@ function concatVideos(inputFile, outputFile) {
     });
 }
 
+function encodingVideos(
+    inputFile,
+    outputFile,
+    vCodec,
+    aCodec,
+    sampleRate,
+    bitRate,
+    fps,
+    scale) {
+        return new Promise((resolve, reject) => {
+            ffmpeg()
+            .input(inputFile)
+            .videoCodec(vCodec)
+            .audioCodec(aCodec)
+            .audioFrequency(sampleRate)
+            .audioBitrate(bitRate)
+            .fps(fps)
+            .size(scale)
+            .output(outputFile)
+            .on('start', cmd => { console.log(cmd) })
+            .on('end', resolve)
+            .on('error', reject)
+            .run()
+        });
+};
+
+function separateVideo(inputFile, outputFile, startTime, duration) {
+    return new Promise((resolve, reject) => {
+        const cmd = ffmpeg()
+            .input(inputFile)
+            .setStartTime(startTime)
+            .videoCodec('copy')  // 비디오 스트림 복사
+            .audioCodec('copy');  // 오디오 스트림 복사
+
+        if (!isNaN(duration)) {
+            cmd.duration(duration)
+        }
+
+        cmd
+            .output(outputFile)
+            .on('start', commandLine => {
+                console.log('실행 중인 FFMPEG 명령어: ', commandLine);
+            })
+            .on('end', resolve)
+            .on('error', reject)
+            .run();
+    });
+}
+
 module.exports = { 
     fadeInOut,
     convertToWav,
     burnInSubtitle,
     separateVideo,
     imgToVideo,
-    concatVideos
+    concatVideos,
+    encodingVideos
 };

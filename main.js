@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
+let rendererProcessesCount = 0;
+
 const createWindow = () => {
     // Create the browser window.
     const win = new BrowserWindow({
@@ -28,7 +30,7 @@ const createWindow = () => {
 // app.whenReady().then(() => {
 app.on('ready', () => {
     // createWindow()
-    mainWindow = new BrowserWindow({
+    const mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
@@ -46,6 +48,11 @@ app.on('ready', () => {
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     });
+
+    mainWindow.webContents.on('did-create-window', () => {
+        rendererProcessesCount++;
+        console.log(`Number of renderer processes: ${rendererProcessesCount}`)
+    })
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -57,3 +64,26 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app's specific main process code.
 // You can also put them in separate files and require them here.
+
+const rendererProcesses = new Set();
+
+setInterval(() => {
+    // const windows = BrowserWindow.getAllWindows();
+    // const aliveRendererProcessCount = windows.reduce((count, window) => {
+    //     const webContents = window.webContents;
+    //     if ( !webContents.isDestroyed() ) {
+    //         rendererProcesses.add(webContents);
+    //         return count + 1;
+    //     } else {
+    //         rendererProcesses.delete(webContents);
+    //         return count;
+    //     }
+    // }, 0);
+
+    // console.log(`Alive renderer processes: ${aliveRendererProcessCount}`);
+
+    /////////////////////////////////////////
+
+    // const numberOfProcesses = process.getProcessMemoryInfo().thcount;
+    // console.log(`Number of processes: ${numberOfProcesses}`)
+}, 1000);

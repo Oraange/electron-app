@@ -7,12 +7,17 @@ const {
     fadeInOut,
     separateVideo,
     imgToVideo,
-    concatVideos
+    concatVideos,
+    encodingVideos
 } = require('./ffmpeg.js');
+const { v4: uuidv4 } = require('uuid');
+const uuid = uuidv4();
 
 const dragZone = document.querySelectorAll('.drag')
 
 let dragedFile1; let dragedFile2;
+
+window.scrollTo(0, document.body.scrollHeight);
 
 dragZone.forEach((element) => {
     element.addEventListener('drop', (event) => {
@@ -81,7 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const playVideo = (file, videoPlayer) => {
     videoPlayer.src = URL.createObjectURL(file);
+    videoPlayer.currentTime = 0;
     videoPlayer.play();
+    videoPlayer.addEventListener('timeupdate', () => {
+        if (videoPlayer.currentTime >= 50) {
+            videoPlayer.pause();
+        }
+    })
 };
 
 const fixedDiv = document.getElementById('process');
@@ -186,30 +197,43 @@ document.querySelector('#divide').addEventListener('click', (event) => {
         }, 3000);
         return;
     }
+
+    //folderPath = 'resources/separated'
+    fs.readdir(folderPath, (err, files) => {
+        if (err) {
+            console.error('폴더를 읽을 수 없음:', err);
+            return;
+        }
+    
+        files.forEach(file => {
+            const filePath = path.join(folderPath, file);
+
+            fs.unlink(filePath, err => {
+                if (err) {
+                    console.error(`파일을 삭제할 수 없음: ${filePath}`, err);
+                } else {
+                    console.log(`파일 삭제됨: ${filePath}`);
+                }
+            });
+        });
+    });
     console.time("영상 분리 시간: ");
     const { path } = file.files[0];
-    const outputFile1 = 'media/aplis_sep_1.mp4';
-    const outputFile2 = 'media/aplis_sep_2.mp4';
+    
+    const startList = [0.00, 13.46, 17.44, 18.48, 46.81, 100.22, 163.52, 171.84]
 
-    separateVideo(path, '00:1:15', outputFile1, outputFile2)
-    .then(() => {
-        fixedDiv.innerHTML = "✔️영상 분리에 성공했습니다"
-        console.timeEnd("영상 분리 시간: ");
-        const videoPlayer1 = document.getElementById('videoPlayer1');
-        const videoPlayer2 = document.getElementById('videoPlayer2');
-        videoPlayer1.src = outputFile1;
-        videoPlayer2.src = outputFile2;
-        videoPlayer1.load();
-        videoPlayer1.play();
-        videoPlayer1.addEventListener('ended', () => {
-            videoPlayer2.load();
-            videoPlayer2.play();
+    const inputFile = `media/${uuid}.mp4`;
+    console.log(inputFile);
+    startList.forEach((element, index, arr) => {
+        const outputFile = `/Users/songchiheon/Downloads/fmpeg/separated_videos/${uuid}_${index}.mp4`;
+        separateVideo(inputFile, outputFile, element, (arr[index+1] - element).toFixed(2))
+        .then(() => {
+            console.log('영상 분리에 성공했습니다.');
+        })
+        .catch((error) => {
+            console.error('영상 분리에 실패했습니다: ', error)
         });
-    })
-    .catch((error) => {
-        fixedDiv.innerHTML = "영상 분리에 실패하였습니다";
-        console.error('영상 분리에 실패하였습니다: ', error)
-    })
+    });
 });
 
 document.querySelector('#imgToVideo').addEventListener('click', (event) => {
@@ -279,5 +303,29 @@ document.querySelector('#concat').addEventListener('click', (event) => {
     .catch((error) => {
         fixedDiv.innerHTML = "영상 합치기 실패..."
         console.error('영상 합치기에 실패했습니다: ', error)
+    });
+})
+
+document.getElementById('encodeVideo').addEventListener('click', (event) => {
+    event.preventDefault();
+    console.time("인코딩 시간: ")
+    const inputFile = file.files[0].path;
+    const outputFile = `media/${uuid}.mp4`;
+    encodingVideos(
+        inputFile,
+        outputFile,
+        'libx264',
+        'aac',
+        '44.1k',
+        '128k',
+        '30000/1001',
+        '1920x1080'
+    ).then(() => {
+        console.timeEnd("인코딩 시간: ");
+        const myAudio = document.getElementById('alert-audio')
+        myAudio.play()
+    })
+    .catch((error) => {
+        console.error('인코딩에 실패하였습니다.\n이유: ', error);
     });
 })

@@ -37,14 +37,15 @@
     "@electron-forge/maker-zip": "^6.1.1",
     "@electron-forge/publisher-github": "^6.1.1",
     "axios": "^1.4.0",
+    "bootstrap": "^5.3.0",
     "electron": "^24.3.1",
-    "electron-builder": "^23.6.0",
-    "bootstrap": "^5.3.0"
+    "electron-builder": "^23.6.0"
   },
   "dependencies": {
     "electron-fetch": "^1.9.1",
     "electron-squirrel-startup": "^1.0.0",
     "ffmpeg-static-electron": "^2.0.3",
-    "fluent-ffmpeg": "^2.1.2"
+    "fluent-ffmpeg": "^2.1.2",
+    "uuid": "^9.0.1"
   }
 }
